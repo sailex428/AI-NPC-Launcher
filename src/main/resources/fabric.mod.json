@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "npc-client-mod",
+  "version": "${version}",
+
+  "name": "npc-client-mod",
+  "description": "",
+  "authors": [],
+  "contact": {},
+
+  "license": "All-Rights-Reserved",
+  "icon": "assets/npc-client-mod/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "io.sailex.npcClient.client.NpcClient"
+    ]
+  },
+
+  "mixins": [
+    "npc-client-mod.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
