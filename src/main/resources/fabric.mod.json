@@ -14,7 +14,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "io.sailex.npcClient.client.NpcClient"
+      "io.sailex.npcClient.NpcClient"
     ]
   },
 
