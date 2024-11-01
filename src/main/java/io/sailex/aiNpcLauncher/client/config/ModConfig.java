@@ -1,9 +1,9 @@
 package io.sailex.aiNpcLauncher.client.config;
 
-import static io.sailex.aiNpc.client.AiNPCClient.MOD_ID;
+import static io.sailex.aiNpcLauncher.client.AiNPCLauncher.MOD_ID;
 
-import io.sailex.aiNpc.client.constant.ConfigConstants;
-import io.sailex.aiNpc.client.exception.InvalidPropertyValueException;
+import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
+import io.sailex.aiNpcLauncher.client.exception.InvalidPropertyValueException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -70,17 +70,6 @@ public class ModConfig {
 			throw new InvalidPropertyValueException("Property key not found: " + key);
 		}
 		return properties.getProperty(key);
-	}
-
-	public static int getIntProperty(String key) {
-		String property = getProperty(key);
-		try {
-			return Integer.parseInt(property);
-		} catch (NumberFormatException e) {
-			LOGGER.error("Invalid integer value '{}' for property key: {}", property, key);
-			throw new InvalidPropertyValueException(
-					String.format("Property value %s is not a valid integer for key: %s", key, e.getMessage()));
-		}
 	}
 
 	public static boolean setProperty(String key, String value) {
