@@ -11,7 +11,12 @@ base {
     archivesName.set(project.extra["archives_base_name"] as String)
 }
 
-repositories {}
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs("libs")
+    }
+}
 
 dependencies {
     minecraft("com.mojang:minecraft:${project.extra["minecraft_version"]}")
@@ -21,6 +26,7 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
+    implementation("me.earth.headlessmc:headlessmc-launcher")
 }
 
 tasks.processResources {
