@@ -54,7 +54,7 @@ public class ClientLauncher {
 
 				installAiNpcClientMod(version);
 
-				LaunchAccount account = getAccount(isOffline);
+				LaunchAccount account = getAccount(npcName, isOffline);
 				if (account == null) {
 					logResult("Failed to login.");
 				}
@@ -166,9 +166,9 @@ public class ClientLauncher {
 		}
 	}
 
-	private LaunchAccount getAccount(boolean isOffline) throws Exception {
+	private LaunchAccount getAccount(String npcName, boolean isOffline) throws Exception {
 		if (isOffline) {
-			return launcher.getAccountManager().getOfflineAccount(launcher.getConfig());
+			return new LaunchAccount("msa", npcName, UUID.randomUUID().toString(), "", "");
 		} else {
 			HttpClient httpClient = MinecraftAuth.createHttpClient();
 			StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
