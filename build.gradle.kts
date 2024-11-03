@@ -78,6 +78,7 @@ tasks.jar {
     from("LICENSE") {
         rename { "${it}_${archivesBaseName}" }
     }
+    from(fileTree("libs") { include("headlessmc-launcher-repackaged-*.jar") })
 }
 
 publishing {
