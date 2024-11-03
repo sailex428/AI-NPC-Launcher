@@ -21,8 +21,10 @@ jobs:
           distribution: 'microsoft'
       - name: make gradle wrapper executable
         run: chmod +x ./gradlew
+      - name: repackageHeadlessmc
+        run: ./gradlew repackageHeadlessmc
       - name: build
-        run: ./gradlew repackageHeadlessmc build
+        run: gradle build
       - name: capture build artifacts
         if: ${{ matrix.java == '21' }}
         uses: actions/upload-artifact@v4
