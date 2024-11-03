@@ -4,13 +4,11 @@
   "version": "${version}",
 
   "name": "ai-npc-launcher",
-  "description": "",
-  "authors": ["author"],
+  "description": "A mod that launches ai npc clients.",
+  "authors": ["sailex428"],
   "contact": {},
 
   "license": "All-Rights-Reserved",
-  "icon": "assets/npc-client-mod/icon.png",
-
   "environment": "client",
   "entrypoints": {
     "client": [
