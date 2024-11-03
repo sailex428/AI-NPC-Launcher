@@ -1,7 +1,6 @@
 package io.sailex.aiNpcLauncher.client.launcher;
 
 import io.sailex.aiNpcLauncher.client.constants.ModRepositories;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -151,16 +150,16 @@ public class ClientLauncher {
 	}
 
 	private void installAiNpcClientMod(Version version) {
-        try {
+		try {
 			LOGGER.info("Downloading AI-NPC mod...");
-            launcher.getVersionSpecificModManager().download(version, ModRepositories.AI_NPC);
+			launcher.getVersionSpecificModManager().download(version, ModRepositories.AI_NPC);
 
-        	LOGGER.info("Install AI-NPC mod...");
+			LOGGER.info("Install AI-NPC mod...");
 			launcher.getVersionSpecificModManager()
-				.install(
-						version,
-						ModRepositories.AI_NPC,
-						Path.of(launcher.getLauncherConfig().getMcFiles().getPath(), "mods"));
+					.install(
+							version,
+							ModRepositories.AI_NPC,
+							Path.of(launcher.getLauncherConfig().getMcFiles().getPath(), "mods"));
 		} catch (VersionSpecificException | IOException e) {
 			LOGGER.error("Failed to download AI-NPC mod.");
 		}
