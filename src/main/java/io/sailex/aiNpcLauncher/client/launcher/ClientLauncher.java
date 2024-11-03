@@ -1,6 +1,7 @@
 package io.sailex.aiNpcLauncher.client.launcher;
 
 import io.sailex.aiNpcLauncher.client.constants.ModRepositories;
+import io.sailex.aiNpcLauncher.client.util.LogUtil;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -23,8 +24,6 @@ import me.earth.headlessmc.launcher.version.Version;
 import me.earth.headlessmc.launcher.version.VersionImpl;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.Text;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
@@ -36,12 +35,10 @@ public class ClientLauncher {
 	private final ClientProcessManager npcClientProcesses;
 	private static final Logger LOGGER = LogManager.getLogger(ClientLauncher.class);
 	private final Launcher launcher;
-	private final MinecraftClient client;
 
-	public ClientLauncher(ClientProcessManager npcClientProcesses, MinecraftClient client) {
+	public ClientLauncher(ClientProcessManager npcClientProcesses) {
 		this.npcClientProcesses = npcClientProcesses;
 		this.launcher = initLauncher();
-		this.client = client;
 		setMcDir();
 	}
 
@@ -55,7 +52,7 @@ public class ClientLauncher {
 
 				LaunchAccount account = getAccount(npcName, isOffline);
 				if (account == null) {
-					log("Failed to login.");
+					LogUtil.error("Failed to login.");
 				}
 
 				FileManager files = launcher.getFileManager()
@@ -76,15 +73,13 @@ public class ClientLauncher {
 
 				if (process == null) {
 					launcher.getExitManager().exit(0);
-					String result = "Failed to launch the game.";
-					LOGGER.error(result);
-					client.inGameHud.getChatHud().addMessage(Text.of(result));
+					LogUtil.error("Failed to launch the game.");
 				}
 
 				npcClientProcesses.addProcess(npcName, process);
-				log("Launching AI-NPC client!");
+				LogUtil.info("Launching AI-NPC client!");
 			} catch (Exception e) {
-				log("Failed to setup or launch the game.");
+				LogUtil.error("Failed to setup or launch the game.");
 			}
 		});
 	}
@@ -116,7 +111,7 @@ public class ClientLauncher {
 		if (version != null) {
 			return version;
 		}
-		LOGGER.info("Downloading Fabric client...");
+		LogUtil.info("Downloading Fabric client...");
 		Version neededVersion = VersionImpl.builder().name(versionName).build();
 
 		DownloadCommand downloadCommand = new DownloadCommand(launcher);
@@ -151,10 +146,10 @@ public class ClientLauncher {
 
 	private void installAiNpcClientMod(Version version) {
 		try {
-			log("Downloading AI-NPC mod...");
+			LogUtil.info("Downloading AI-NPC mod...");
 			launcher.getVersionSpecificModManager().download(version, ModRepositories.AI_NPC);
 
-			log("Install AI-NPC mod...");
+			LogUtil.info("Install AI-NPC mod...");
 			launcher.getVersionSpecificModManager()
 					.install(
 							version,
@@ -172,17 +167,12 @@ public class ClientLauncher {
 			HttpClient httpClient = MinecraftAuth.createHttpClient();
 			StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
 					httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
-						log("Go to");
-						log(msaDeviceCode.getDirectVerificationUri());
+						LogUtil.info("Go to");
+						LogUtil.info(msaDeviceCode.getDirectVerificationUri());
 					}));
 			ValidatedAccount validatedAccount = new ValidatedAccount(
 					javaSession, javaSession.getMcProfile().getMcToken().getAccessToken());
 			return validatedAccount.toLaunchAccount();
 		}
-	}
-
-	private void log(String message) {
-		LOGGER.info(message);
-		client.inGameHud.getChatHud().addMessage(Text.of("[§5AI-NPC§f] " + message));
 	}
 }

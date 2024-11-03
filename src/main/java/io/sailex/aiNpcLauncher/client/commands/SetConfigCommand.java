@@ -8,8 +8,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import io.sailex.aiNpcLauncher.client.config.ModConfig;
 import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
+import io.sailex.aiNpcLauncher.client.util.LogUtil;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
 
 public class SetConfigCommand {
 
@@ -31,16 +31,16 @@ public class SetConfigCommand {
 		String propertyValue = StringArgumentType.getString(context, "value");
 
 		if (!ConfigConstants.ALLOWED_KEYS.contains(propertyKey)) {
-			context.getSource().sendFeedback(Text.of("Invalid property key!"));
+			LogUtil.error("Invalid property key!");
 			return 0;
 		}
 
 		if (ModConfig.setProperty(propertyKey, propertyValue)) {
-			context.getSource().sendFeedback(Text.of("Saved property successfully!"));
+			LogUtil.info("Saved property successfully!");
 			return 1;
 		}
 
-		context.getSource().sendFeedback(Text.of("Failed to save property!"));
+		LogUtil.error("Failed to save property!");
 		return 0;
 	}
 }

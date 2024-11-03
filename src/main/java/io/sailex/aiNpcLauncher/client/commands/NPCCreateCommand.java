@@ -10,9 +10,9 @@ import com.mojang.brigadier.context.CommandContext;
 import io.sailex.aiNpcLauncher.client.config.ModConfig;
 import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
 import io.sailex.aiNpcLauncher.client.launcher.ClientLauncher;
+import io.sailex.aiNpcLauncher.client.util.LogUtil;
 import java.util.Set;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
 
 public class NPCCreateCommand {
 
@@ -47,7 +47,7 @@ public class NPCCreateCommand {
 		String name = StringArgumentType.getString(context, "name");
 		boolean isOffline = BoolArgumentType.getBool(context, "isOffline");
 
-		context.getSource().sendFeedback(Text.of("Creating NPC with name: " + name));
+		LogUtil.info("Creating NPC with name: " + name);
 
 		String type = ModConfig.getProperty(ConfigConstants.NPC_LLM_TYPE);
 
@@ -69,9 +69,7 @@ public class NPCCreateCommand {
 		String llmType = StringArgumentType.getString(context, LLM_TYPE);
 		String llmModel = StringArgumentType.getString(context, LLM_MODEL);
 
-		context.getSource()
-				.sendFeedback(Text.of(
-						"Creating NPC with name: " + name + ", LLM Type: " + llmType + ", LLM Model: " + llmModel));
+		LogUtil.info(("Creating NPC with name: " + name + ", LLM Type: " + llmType + ", LLM Model: " + llmModel));
 
 		clientLauncher.launch(name, llmType, llmModel, isOffline);
 		return 1;

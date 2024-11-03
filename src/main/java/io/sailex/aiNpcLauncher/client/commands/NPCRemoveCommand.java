@@ -7,9 +7,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import io.sailex.aiNpcLauncher.client.launcher.ClientProcessManager;
+import io.sailex.aiNpcLauncher.client.util.LogUtil;
 import lombok.AllArgsConstructor;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
 
 @AllArgsConstructor
 public class NPCRemoveCommand {
@@ -24,7 +24,7 @@ public class NPCRemoveCommand {
 	private int removeNPC(CommandContext<FabricClientCommandSource> context) {
 		String name = StringArgumentType.getString(context, "name");
 
-		context.getSource().sendFeedback(Text.of("Removing NPC with name: " + name));
+		LogUtil.info("Removing NPC with name: " + name);
 		clientProcessManager.endProcess(name);
 		return 1;
 	}
