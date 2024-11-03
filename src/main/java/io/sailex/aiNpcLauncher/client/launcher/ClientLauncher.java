@@ -55,7 +55,7 @@ public class ClientLauncher {
 
 				LaunchAccount account = getAccount(npcName, isOffline);
 				if (account == null) {
-					logResult("Failed to login.");
+					log("Failed to login.");
 				}
 
 				FileManager files = launcher.getFileManager()
@@ -82,9 +82,9 @@ public class ClientLauncher {
 				}
 
 				npcClientProcesses.addProcess(npcName, process);
-				logResult("Launching AI-NPC client!");
+				log("Launching AI-NPC client!");
 			} catch (Exception e) {
-				logResult("Failed to setup or launch the game.");
+				log("Failed to setup or launch the game.");
 			}
 		});
 	}
@@ -151,10 +151,10 @@ public class ClientLauncher {
 
 	private void installAiNpcClientMod(Version version) {
 		try {
-			LOGGER.info("Downloading AI-NPC mod...");
+			log("Downloading AI-NPC mod...");
 			launcher.getVersionSpecificModManager().download(version, ModRepositories.AI_NPC);
 
-			LOGGER.info("Install AI-NPC mod...");
+			log("Install AI-NPC mod...");
 			launcher.getVersionSpecificModManager()
 					.install(
 							version,
@@ -172,8 +172,8 @@ public class ClientLauncher {
 			HttpClient httpClient = MinecraftAuth.createHttpClient();
 			StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
 					httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
-						client.inGameHud.getChatHud().addMessage(Text.of("Go to"));
-						client.inGameHud.getChatHud().addMessage(Text.of(msaDeviceCode.getDirectVerificationUri()));
+						log("Go to");
+						log(msaDeviceCode.getDirectVerificationUri());
 					}));
 			ValidatedAccount validatedAccount = new ValidatedAccount(
 					javaSession, javaSession.getMcProfile().getMcToken().getAccessToken());
@@ -181,8 +181,8 @@ public class ClientLauncher {
 		}
 	}
 
-	private void logResult(String result) {
-		LOGGER.info(result);
-		client.inGameHud.getChatHud().addMessage(Text.of(result));
+	private void log(String message) {
+		LOGGER.info(message);
+		client.inGameHud.getChatHud().addMessage(Text.of("[§5AI-NPC§f] " + message));
 	}
 }
