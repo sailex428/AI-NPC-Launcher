@@ -24,5 +24,4 @@ public class ClientProcessManager {
 			npcClientProcesses.remove(npcName);
 		}
 	}
-
 }

@@ -76,5 +76,4 @@ public class NPCCreateCommand {
 		clientLauncher.launch(name, llmType, llmModel, isOffline);
 		return 1;
 	}
-
 }
