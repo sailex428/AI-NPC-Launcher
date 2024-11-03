@@ -26,7 +26,16 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
-    implementation("me.earth.headlessmc:headlessmc-launcher")
+
+    implementation("me.earth.headlessmc:headlessmc-launcher-repackaged:2.3.0")
+}
+
+tasks.register<Jar>("repackageHeadlessmc") {
+    from(zipTree("libs/headlessmc-launcher-2.3.0.jar")) {
+        exclude("org/objectweb/asm/**")
+    }
+    destinationDirectory.set(file("libs"))
+    archiveFileName.set("headlessmc-launcher-repackaged-2.3.0.jar")
 }
 
 tasks.processResources {
