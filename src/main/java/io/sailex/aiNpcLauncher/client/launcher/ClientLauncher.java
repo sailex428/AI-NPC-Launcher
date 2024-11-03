@@ -57,7 +57,10 @@ public class ClientLauncher {
 
 				LaunchOptions options = LaunchOptions.builder()
 						.account(account)
-						.additionalJvmArgs(List.of("-Dllm.type=" + llmType, "-Dllm.model=" + llmModel))
+						.additionalJvmArgs(List.of("-Dllm.type=" + llmType,
+								"-Dllm.model=" + llmModel,
+								isOffline ? "-Dhmc.offline.username=" + npcName : ""
+						))
 						.version(baseVersion)
 						.launcher(launcher)
 						.files(files)
