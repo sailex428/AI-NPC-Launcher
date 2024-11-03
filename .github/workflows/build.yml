@@ -29,5 +29,5 @@ jobs:
         if: ${{ matrix.java == '21' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ai-npc-launcher.jar
-          path: build/libs/ai-npc-launcher-*.jar
+          name: ai-npc-launcher
+          path: build/libs/
