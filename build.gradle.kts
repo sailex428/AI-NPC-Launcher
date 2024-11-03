@@ -11,13 +11,31 @@ base {
     archivesName.set(project.extra["archives_base_name"] as String)
 }
 
-repositories {}
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs("libs")
+    }
+}
 
 dependencies {
     minecraft("com.mojang:minecraft:${project.extra["minecraft_version"]}")
     mappings("net.fabricmc:yarn:${project.extra["yarn_mappings"]}:v2")
     modImplementation("net.fabricmc:fabric-loader:${project.extra["loader_version"]}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.extra["fabric_version"]}")
+
+    compileOnly("org.projectlombok:lombok:1.18.34")
+    annotationProcessor("org.projectlombok:lombok:1.18.34")
+
+    implementation("me.earth.headlessmc:headlessmc-launcher-repackaged:2.3.0")
+}
+
+tasks.register<Jar>("repackageHeadlessmc") {
+    from(zipTree("libs/headlessmc-launcher-2.3.0.jar")) {
+        exclude("org/objectweb/asm/**")
+    }
+    destinationDirectory.set(file("libs"))
+    archiveFileName.set("headlessmc-launcher-repackaged-2.3.0.jar")
 }
 
 tasks.processResources {
@@ -60,6 +78,7 @@ tasks.jar {
     from("LICENSE") {
         rename { "${it}_${archivesBaseName}" }
     }
+    from(fileTree("libs") { include("headlessmc-launcher-repackaged-*.jar") })
 }
 
 publishing {
@@ -76,7 +95,7 @@ publishing {
 spotless {
     java {
         palantirJavaFormat()
-        indentWithTabs(4)
+        indentWithTabs()
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()

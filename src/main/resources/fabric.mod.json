@@ -1,26 +1,20 @@
 {
   "schemaVersion": 1,
-  "id": "npc-client-mod",
+  "id": "ai-npc-launcher",
   "version": "${version}",
 
-  "name": "npc-client-mod",
-  "description": "",
-  "authors": [],
+  "name": "ai-npc-launcher",
+  "description": "A mod that launches ai npc clients.",
+  "authors": ["sailex428"],
   "contact": {},
 
   "license": "All-Rights-Reserved",
-  "icon": "assets/npc-client-mod/icon.png",
-
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "client": [
-      "io.sailex.npcClient.NpcClient"
+      "io.sailex.aiNpcLauncher.client.AiNPCLauncher"
     ]
   },
-
-  "mixins": [
-    "npc-client-mod.mixins.json"
-  ],
 
   "depends": {
     "fabricloader": ">=${loader_version}",
