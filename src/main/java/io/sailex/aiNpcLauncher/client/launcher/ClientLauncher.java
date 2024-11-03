@@ -1,5 +1,8 @@
 package io.sailex.aiNpcLauncher.client.launcher;
 
+import io.sailex.aiNpcLauncher.client.constants.ModRepositories;
+
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +19,7 @@ import me.earth.headlessmc.launcher.command.download.DownloadCommand;
 import me.earth.headlessmc.launcher.command.download.VersionInfo;
 import me.earth.headlessmc.launcher.files.FileManager;
 import me.earth.headlessmc.launcher.launch.LaunchOptions;
+import me.earth.headlessmc.launcher.specifics.VersionSpecificException;
 import me.earth.headlessmc.launcher.version.Version;
 import me.earth.headlessmc.launcher.version.VersionImpl;
 import net.lenni0451.commons.httpclient.HttpClient;
@@ -48,6 +52,8 @@ public class ClientLauncher {
 				String versionName = SharedConstants.getGameVersion().getName();
 				Version version = findOrDownloadFabric(versionName);
 
+				installAiNpcClientMod(version);
+
 				LaunchAccount account = getAccount(isOffline);
 				if (account == null) {
 					logResult("Failed to login.");
@@ -58,10 +64,7 @@ public class ClientLauncher {
 
 				LaunchOptions options = LaunchOptions.builder()
 						.account(account)
-						.additionalJvmArgs(List.of(
-								"-Dllm.type=" + llmType,
-								"-Dllm.model=" + llmModel,
-								isOffline ? "-Dhmc.offline.username=" + npcName : ""))
+						.additionalJvmArgs(List.of("-Dllm.type=" + llmType, "-Dllm.model=" + llmModel))
 						.version(version)
 						.launcher(launcher)
 						.files(files)
@@ -80,7 +83,7 @@ public class ClientLauncher {
 				}
 
 				npcClientProcesses.addProcess(npcName, process);
-				logResult("Launched client successfully!");
+				logResult("Launching AI-NPC client!");
 			} catch (Exception e) {
 				logResult("Failed to setup or launch the game.");
 			}
@@ -114,6 +117,7 @@ public class ClientLauncher {
 		if (version != null) {
 			return version;
 		}
+		LOGGER.info("Downloading Fabric client...");
 		Version neededVersion = VersionImpl.builder().name(versionName).build();
 
 		DownloadCommand downloadCommand = new DownloadCommand(launcher);
@@ -144,6 +148,22 @@ public class ClientLauncher {
 			}
 		}
 		return null;
+	}
+
+	private void installAiNpcClientMod(Version version) {
+        try {
+			LOGGER.info("Downloading AI-NPC mod...");
+            launcher.getVersionSpecificModManager().download(version, ModRepositories.AI_NPC);
+
+        	LOGGER.info("Install AI-NPC mod...");
+			launcher.getVersionSpecificModManager()
+				.install(
+						version,
+						ModRepositories.AI_NPC,
+						Path.of(launcher.getLauncherConfig().getMcFiles().getPath(), "mods"));
+		} catch (VersionSpecificException | IOException e) {
+			LOGGER.error("Failed to download AI-NPC mod.");
+		}
 	}
 
 	private LaunchAccount getAccount(boolean isOffline) throws Exception {
