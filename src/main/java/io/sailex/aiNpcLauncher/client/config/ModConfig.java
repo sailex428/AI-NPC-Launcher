@@ -39,7 +39,6 @@ public class ModConfig {
 		properties.setProperty(ConfigConstants.NPC_LLM_OLLAMA_URL, "http://localhost:11434/api/generate");
 		properties.setProperty(ConfigConstants.NPC_LLM_OLLAMA_MODEL, "gemma2");
 
-		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_URL, "https\\://api.openai.com/v1/chat/completion");
 		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_MODEL, "gpt-4o-mini");
 
 		properties.setProperty(ConfigConstants.NPC_LLM_TYPE, "openai");

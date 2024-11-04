@@ -1,9 +1,12 @@
 package io.sailex.aiNpcLauncher.client.launcher;
 
+import io.sailex.aiNpcLauncher.client.config.ModConfig;
+import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
 import io.sailex.aiNpcLauncher.client.constants.ModRepositories;
 import io.sailex.aiNpcLauncher.client.util.LogUtil;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -60,7 +63,7 @@ public class ClientLauncher {
 
 				LaunchOptions options = LaunchOptions.builder()
 						.account(account)
-						.additionalJvmArgs(List.of("-Dllm.type=" + llmType, "-Dllm.model=" + llmModel))
+						.additionalJvmArgs(getJvmArgs(llmType, llmModel))
 						.version(version)
 						.launcher(launcher)
 						.files(files)
@@ -174,5 +177,30 @@ public class ClientLauncher {
 					javaSession, javaSession.getMcProfile().getMcToken().getAccessToken());
 			return validatedAccount.toLaunchAccount();
 		}
+	}
+
+	private List<String> getJvmArgs(String llmType, String llmModel) {
+		List<String> jvmArgs = new ArrayList<>();
+		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_LLM_TYPE, llmType));
+
+		if (llmType.equals("ollama")) {
+			jvmArgs.addAll(List.of(
+					buildJvmArg(
+							ConfigConstants.NPC_LLM_OLLAMA_URL,
+							ModConfig.getProperty(ConfigConstants.NPC_LLM_OLLAMA_URL)),
+					buildJvmArg(ConfigConstants.NPC_LLM_OLLAMA_MODEL, llmModel)));
+		} else {
+			jvmArgs.addAll(List.of(
+					buildJvmArg(ConfigConstants.NPC_LLM_OPENAI_MODEL, llmModel),
+					buildJvmArg(
+							ConfigConstants.NPC_LLM_OPENAI_API_KEY,
+							ModConfig.getProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY))));
+		}
+		return jvmArgs;
+	}
+
+	private String buildJvmArg(String key, String value) {
+		String argPrefix = "-D";
+		return argPrefix + key + "=" + value;
 	}
 }
