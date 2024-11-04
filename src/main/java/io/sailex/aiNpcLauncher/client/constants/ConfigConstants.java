@@ -11,9 +11,5 @@ public class ConfigConstants {
 	public static final String NPC_LLM_TYPE = "npc.llm.type";
 
 	public static final Set<String> ALLOWED_KEYS = Set.of(
-			NPC_LLM_OLLAMA_URL,
-			NPC_LLM_OLLAMA_MODEL,
-			NPC_LLM_OPENAI_MODEL,
-			NPC_LLM_OPENAI_API_KEY,
-			NPC_LLM_TYPE);
+			NPC_LLM_OLLAMA_URL, NPC_LLM_OLLAMA_MODEL, NPC_LLM_OPENAI_MODEL, NPC_LLM_OPENAI_API_KEY, NPC_LLM_TYPE);
 }
