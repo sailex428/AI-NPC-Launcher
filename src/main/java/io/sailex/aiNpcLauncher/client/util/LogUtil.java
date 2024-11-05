@@ -9,12 +9,12 @@ public class LogUtil {
 	private static final MinecraftClient client = MinecraftClient.getInstance();
 
 	public static void info(String message) {
-		String formattedMessage = PREFIX + "§c" + message;
+		String formattedMessage = PREFIX + message;
 		log(formattedMessage);
 	}
 
 	public static void error(String message) {
-		String formattedMessage = PREFIX + message;
+		String formattedMessage = PREFIX + "§c" + message;
 		log(formattedMessage);
 	}
 
