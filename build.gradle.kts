@@ -27,7 +27,7 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
 
-    implementation("me.earth.headlessmc:headlessmc-launcher-repackaged:2.3.0")
+    include(modImplementation("me.earth.headlessmc:headlessmc-launcher-repackaged:2.3.0")!!)
 }
 
 tasks.register<Jar>("repackageHeadlessmc") {
@@ -53,7 +53,7 @@ tasks.processResources {
     }
 }
 
-val targetJavaVersion = 21
+val targetJavaVersion = 17
 
 tasks {
     withType<JavaCompile> {
@@ -78,7 +78,6 @@ tasks.jar {
     from("LICENSE") {
         rename { "${it}_${archivesBaseName}" }
     }
-    from(fileTree("libs") { include("headlessmc-launcher-repackaged-*.jar") })
 }
 
 publishing {
