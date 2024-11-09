@@ -3,7 +3,6 @@ package io.sailex.aiNpcLauncher.client.config;
 import static io.sailex.aiNpcLauncher.client.AiNPCLauncher.MOD_ID;
 
 import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
-import io.sailex.aiNpcLauncher.client.exception.InvalidPropertyValueException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,6 +41,7 @@ public class ModConfig {
 		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_MODEL, "gpt-4o-mini");
 		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY, "your-api-key");
 		properties.setProperty(ConfigConstants.NPC_LLM_TYPE, "openai");
+		properties.setProperty(ConfigConstants.NPC_IS_HEADLESS, "true");
 	}
 
 	public static boolean saveProperties() {
@@ -66,7 +66,7 @@ public class ModConfig {
 	public static String getProperty(String key) {
 		if (!properties.containsKey(key)) {
 			LOGGER.error("Property key '{}' not found!", key);
-			throw new InvalidPropertyValueException("Property key not found: " + key);
+			return null;
 		}
 		return properties.getProperty(key);
 	}

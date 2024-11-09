@@ -4,7 +4,9 @@ import io.sailex.aiNpcLauncher.client.config.ModConfig;
 import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
 import io.sailex.aiNpcLauncher.client.constants.ModRepositories;
 import io.sailex.aiNpcLauncher.client.util.LogUtil;
+import java.awt.*;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +70,7 @@ public class ClientLauncher {
 						.launcher(launcher)
 						.files(files)
 						.parseFlags(launcher, false)
-						.lwjgl(false)
+						.lwjgl(Boolean.parseBoolean(ModConfig.getProperty(ConfigConstants.NPC_IS_HEADLESS)))
 						.prepare(false)
 						.build();
 
@@ -170,8 +172,19 @@ public class ClientLauncher {
 			HttpClient httpClient = MinecraftAuth.createHttpClient();
 			StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
 					httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
-						LogUtil.info("Go to");
-						LogUtil.info(msaDeviceCode.getDirectVerificationUri());
+						LogUtil.info("Go to", true);
+						LogUtil.info(msaDeviceCode.getDirectVerificationUri(), true);
+						try {
+							URI url = URI.create(msaDeviceCode.getDirectVerificationUri());
+							if (Desktop.isDesktopSupported()
+									&& Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+								Desktop.getDesktop().browse(url);
+							} else {
+								new ProcessBuilder("open", url.toString()).start();
+							}
+						} catch (Exception e) {
+							LogUtil.error("Failed to open the verification URL automatically" + e);
+						}
 					}));
 			ValidatedAccount validatedAccount = new ValidatedAccount(
 					javaSession, javaSession.getMcProfile().getMcToken().getAccessToken());
@@ -182,6 +195,15 @@ public class ClientLauncher {
 	private List<String> getJvmArgs(String llmType, String llmModel) {
 		List<String> jvmArgs = new ArrayList<>();
 		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_LLM_TYPE, llmType));
+
+		String serverIp = ModConfig.getProperty(ConfigConstants.NPC_SERVER_IP);
+		String serverPort = ModConfig.getProperty(ConfigConstants.NPC_SERVER_PORT);
+
+		if (serverIp != null && serverPort != null) {
+			jvmArgs.addAll(List.of(
+					buildJvmArg(ConfigConstants.NPC_SERVER_IP, serverIp),
+					buildJvmArg(ConfigConstants.NPC_SERVER_PORT, serverPort)));
+		}
 
 		if (llmType.equals("ollama")) {
 			jvmArgs.addAll(List.of(
