@@ -149,7 +149,7 @@ public class ClientLauncher {
 
 	private void installAiNpcClientMod(Version version) {
 		try {
-			LogUtil.info("Downloading AI-NPC mod...");
+			LogUtil.info("Downloading latest AI-NPC mod...");
 			launcher.getVersionSpecificModManager().download(version, ModRepositories.AI_NPC);
 
 			LogUtil.info("Install AI-NPC mod...");
