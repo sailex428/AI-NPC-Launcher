@@ -166,7 +166,7 @@ public class ClientLauncher {
 	}
 
 	private LaunchAccount getAccount(String npcName, boolean isOffline) throws Exception {
-		if (isOffline) {
+		if (isOffline && isLocalIp()) {
 			return new LaunchAccount("msa", npcName, UUID.randomUUID().toString(), "", "");
 		} else {
 			HttpClient httpClient = MinecraftAuth.createHttpClient();
@@ -219,6 +219,19 @@ public class ClientLauncher {
 							ModConfig.getProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY))));
 		}
 		return jvmArgs;
+	}
+
+	private boolean isLocalIp() {
+		String serverIp = ModConfig.getProperty(ConfigConstants.NPC_SERVER_IP);
+
+		if (serverIp == null) {
+			return true;
+		}
+		
+		if (serverIp.equals("127.0.0.1") || serverIp.equals("localhost")) {
+			return true;
+		}
+		return false;
 	}
 
 	private String buildJvmArg(String key, String value) {
