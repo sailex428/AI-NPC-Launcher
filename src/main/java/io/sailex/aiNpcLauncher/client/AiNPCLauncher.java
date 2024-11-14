@@ -15,6 +15,8 @@ public class AiNPCLauncher implements ClientModInitializer {
 		ModConfig.init();
 
 		ClientProcessManager npcClientProcessManager = new ClientProcessManager();
+		npcClientProcessManager.registerEndProcessOnDisconnect();
+
 		ClientLauncher clientLauncher = new ClientLauncher(npcClientProcessManager);
 
 		CommandManager commandManager = new CommandManager(clientLauncher, npcClientProcessManager);

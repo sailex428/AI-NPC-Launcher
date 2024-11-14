@@ -172,7 +172,9 @@ public class ClientLauncher {
 	private LaunchAccount getAccount(String npcName, boolean isOffline) throws Exception {
 		if (isOffline) {
 			LogUtil.info("Logging in offline...");
-			if (client.isConnectedToLocalServer()) {
+
+			ServerInfo serverInfo = client.getCurrentServerEntry();
+			if (serverInfo != null && serverInfo.address.equals("localhost")) {
 				return new LaunchAccount("msa", npcName, UUID.randomUUID().toString(), "", "");
 			}
 			LogUtil.error("Failed to login. You are not connected to a local server.");
