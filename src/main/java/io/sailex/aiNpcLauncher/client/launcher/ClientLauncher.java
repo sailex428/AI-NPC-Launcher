@@ -52,17 +52,18 @@ public class ClientLauncher {
 	}
 
 	public void launch(String npcName, String llmType, String llmModel, boolean isOffline) {
+		LaunchAccount account = getAccount(npcName, isOffline);
+		if (account == null) {
+			LogUtil.error("Failed to login.");
+			return;
+		}
+
 		CompletableFuture.runAsync(() -> {
 			try {
 				String versionName = SharedConstants.getGameVersion().getName();
 				Version version = findOrDownloadFabric(versionName);
 
 				installAiNpcClientMod(version);
-
-				LaunchAccount account = getAccount(npcName, isOffline);
-				if (account == null) {
-					LogUtil.error("Failed to login.");
-				}
 
 				FileManager files = launcher.getFileManager()
 						.createRelative(UUID.randomUUID().toString());
@@ -169,10 +170,9 @@ public class ClientLauncher {
 		}
 	}
 
-	private LaunchAccount getAccount(String npcName, boolean isOffline) throws Exception {
+	private LaunchAccount getAccount(String npcName, boolean isOffline) {
 		if (isOffline) {
 			LogUtil.info("Logging in offline...");
-
 			ServerInfo serverInfo = client.getCurrentServerEntry();
 			if (serverInfo != null && serverInfo.address.equals("localhost")) {
 				return new LaunchAccount("msa", npcName, UUID.randomUUID().toString(), "", "");
@@ -180,26 +180,32 @@ public class ClientLauncher {
 			LogUtil.error("Failed to login. You are not connected to a local server.");
 		}
 
-		LogUtil.info("Logging in MC account...");
-		HttpClient httpClient = MinecraftAuth.createHttpClient();
-		StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
-				httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
-					LogUtil.info("Go to", true);
-					LogUtil.info(msaDeviceCode.getDirectVerificationUri(), true);
-					try {
-						URI url = URI.create(msaDeviceCode.getDirectVerificationUri());
-						if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-							Desktop.getDesktop().browse(url);
-						} else {
-							new ProcessBuilder("open", url.toString()).start();
+		try {
+			LogUtil.info("Logging in MC account...");
+			HttpClient httpClient = MinecraftAuth.createHttpClient();
+			StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
+					httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
+						LogUtil.info("Go to", true);
+						LogUtil.info(msaDeviceCode.getDirectVerificationUri(), true);
+						try {
+							URI url = URI.create(msaDeviceCode.getDirectVerificationUri());
+							if (Desktop.isDesktopSupported()
+									&& Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+								Desktop.getDesktop().browse(url);
+							} else {
+								new ProcessBuilder("open", url.toString()).start();
+							}
+						} catch (Exception e) {
+							LogUtil.error("Failed to open the verification URL automatically" + e);
 						}
-					} catch (Exception e) {
-						LogUtil.error("Failed to open the verification URL automatically" + e);
-					}
-				}));
-		ValidatedAccount validatedAccount = new ValidatedAccount(
-				javaSession, javaSession.getMcProfile().getMcToken().getAccessToken());
-		return validatedAccount.toLaunchAccount();
+					}));
+			ValidatedAccount validatedAccount = new ValidatedAccount(
+					javaSession, javaSession.getMcProfile().getMcToken().getAccessToken());
+			return validatedAccount.toLaunchAccount();
+		} catch (Exception e) {
+			LogUtil.error("Login failed: " + e.getMessage());
+			return null;
+		}
 	}
 
 	private List<String> getJvmArgs(String llmType, String llmModel) {
