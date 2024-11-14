@@ -55,14 +55,6 @@ public class NPCCreateCommand {
 		return 1;
 	}
 
-	private String getLlmModel(String type) {
-		if (type.equals("ollama")) {
-			return ModConfig.getProperty(ConfigConstants.NPC_LLM_OLLAMA_MODEL);
-		} else {
-			return ModConfig.getProperty(ConfigConstants.NPC_LLM_OPENAI_MODEL);
-		}
-	}
-
 	private int createNPCWithLLM(CommandContext<FabricClientCommandSource> context) {
 		String name = StringArgumentType.getString(context, "name");
 		boolean isOffline = BoolArgumentType.getBool(context, "isOffline");
@@ -73,5 +65,15 @@ public class NPCCreateCommand {
 
 		clientLauncher.launch(name, llmType, llmModel, isOffline);
 		return 1;
+	}
+
+	private String getLlmModel(String type) {
+		if (type.equals("ollama")) {
+			return ModConfig.getProperty(ConfigConstants.NPC_LLM_OLLAMA_MODEL);
+		} else if (type.equals("openai")) {
+			return ModConfig.getProperty(ConfigConstants.NPC_LLM_OPENAI_MODEL);
+		} else {
+			throw new IllegalArgumentException("Invalid LLM type: " + type);
+		}
 	}
 }
