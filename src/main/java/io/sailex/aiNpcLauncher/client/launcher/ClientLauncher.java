@@ -29,6 +29,8 @@ import me.earth.headlessmc.launcher.version.Version;
 import me.earth.headlessmc.launcher.version.VersionImpl;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ServerInfo;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
@@ -37,28 +39,31 @@ import org.apache.logging.log4j.Logger;
 
 public class ClientLauncher {
 
-	private final ClientProcessManager npcClientProcesses;
 	private static final Logger LOGGER = LogManager.getLogger(ClientLauncher.class);
+	private final MinecraftClient client;
+	private final ClientProcessManager npcClientProcesses;
 	private final Launcher launcher;
 
 	public ClientLauncher(ClientProcessManager npcClientProcesses) {
 		this.npcClientProcesses = npcClientProcesses;
 		this.launcher = initLauncher();
+		this.client = MinecraftClient.getInstance();
 		setMcDir();
 	}
 
 	public void launch(String npcName, String llmType, String llmModel, boolean isOffline) {
+		LaunchAccount account = getAccount(npcName, isOffline);
+		if (account == null) {
+			LogUtil.error("Failed to login.");
+			return;
+		}
+
 		CompletableFuture.runAsync(() -> {
 			try {
 				String versionName = SharedConstants.getGameVersion().getName();
 				Version version = findOrDownloadFabric(versionName);
 
 				installAiNpcClientMod(version);
-
-				LaunchAccount account = getAccount(npcName, isOffline);
-				if (account == null) {
-					LogUtil.error("Failed to login.");
-				}
 
 				FileManager files = launcher.getFileManager()
 						.createRelative(UUID.randomUUID().toString());
@@ -151,24 +156,32 @@ public class ClientLauncher {
 
 	private void installAiNpcClientMod(Version version) {
 		try {
-			LogUtil.info("Downloading latest AI-NPC mod...");
+			LogUtil.info("Downloading latest AI-NPC mod.");
 			launcher.getVersionSpecificModManager().download(version, ModRepositories.AI_NPC);
 
-			LogUtil.info("Install AI-NPC mod...");
+			LogUtil.info("Installing AI-NPC mod.");
 			launcher.getVersionSpecificModManager()
 					.install(
 							version,
 							ModRepositories.AI_NPC,
 							Path.of(launcher.getLauncherConfig().getMcFiles().getPath(), "mods"));
 		} catch (VersionSpecificException | IOException e) {
-			LOGGER.error("Failed to download AI-NPC mod.");
+			LOGGER.error("Failed to download/install AI-NPC mod.");
 		}
 	}
 
-	private LaunchAccount getAccount(String npcName, boolean isOffline) throws Exception {
-		if (isOffline && isLocalIp()) {
-			return new LaunchAccount("msa", npcName, UUID.randomUUID().toString(), "", "");
-		} else {
+	private LaunchAccount getAccount(String npcName, boolean isOffline) {
+		if (isOffline) {
+			LogUtil.info("Logging in offline...");
+			ServerInfo serverInfo = client.getCurrentServerEntry();
+			if (serverInfo != null && serverInfo.address.equals("localhost")) {
+				return new LaunchAccount("msa", npcName, UUID.randomUUID().toString(), "", "");
+			}
+			LogUtil.error("Failed to login. You are not connected to a local server.");
+		}
+
+		try {
+			LogUtil.info("Logging in MC account...");
 			HttpClient httpClient = MinecraftAuth.createHttpClient();
 			StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
 					httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
@@ -189,21 +202,16 @@ public class ClientLauncher {
 			ValidatedAccount validatedAccount = new ValidatedAccount(
 					javaSession, javaSession.getMcProfile().getMcToken().getAccessToken());
 			return validatedAccount.toLaunchAccount();
+		} catch (Exception e) {
+			LogUtil.error("Login failed: " + e.getMessage());
+			return null;
 		}
 	}
 
 	private List<String> getJvmArgs(String llmType, String llmModel) {
 		List<String> jvmArgs = new ArrayList<>();
+		addServerAddressJvmArg(jvmArgs);
 		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_LLM_TYPE, llmType));
-
-		String serverIp = ModConfig.getProperty(ConfigConstants.NPC_SERVER_IP);
-		String serverPort = ModConfig.getProperty(ConfigConstants.NPC_SERVER_PORT);
-
-		if (serverIp != null && serverPort != null) {
-			jvmArgs.addAll(List.of(
-					buildJvmArg(ConfigConstants.NPC_SERVER_IP, serverIp),
-					buildJvmArg(ConfigConstants.NPC_SERVER_PORT, serverPort)));
-		}
 
 		if (llmType.equals("ollama")) {
 			jvmArgs.addAll(List.of(
@@ -211,7 +219,9 @@ public class ClientLauncher {
 							ConfigConstants.NPC_LLM_OLLAMA_URL,
 							ModConfig.getProperty(ConfigConstants.NPC_LLM_OLLAMA_URL)),
 					buildJvmArg(ConfigConstants.NPC_LLM_OLLAMA_MODEL, llmModel)));
-		} else {
+		}
+
+		if (llmType.equals("openai")) {
 			jvmArgs.addAll(List.of(
 					buildJvmArg(ConfigConstants.NPC_LLM_OPENAI_MODEL, llmModel),
 					buildJvmArg(
@@ -221,17 +231,18 @@ public class ClientLauncher {
 		return jvmArgs;
 	}
 
-	private boolean isLocalIp() {
-		String serverIp = ModConfig.getProperty(ConfigConstants.NPC_SERVER_IP);
+	private void addServerAddressJvmArg(List<String> jvmArgs) {
+		String address;
+		ServerInfo serverInfo = client.getCurrentServerEntry();
+		if (serverInfo != null) {
+			address = serverInfo.address;
+		} else {
+			address = ModConfig.getProperty(ConfigConstants.NPC_SERVER_IP);
+		}
 
-		if (serverIp == null) {
-			return true;
-		}
-		
-		if (serverIp.equals("127.0.0.1") || serverIp.equals("localhost")) {
-			return true;
-		}
-		return false;
+		String port = ModConfig.getProperty(ConfigConstants.NPC_SERVER_PORT);
+		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_SERVER_IP, address));
+		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_SERVER_PORT, port));
 	}
 
 	private String buildJvmArg(String key, String value) {

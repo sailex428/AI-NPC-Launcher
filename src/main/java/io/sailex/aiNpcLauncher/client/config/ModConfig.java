@@ -42,6 +42,8 @@ public class ModConfig {
 		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY, "your-api-key");
 		properties.setProperty(ConfigConstants.NPC_LLM_TYPE, "openai");
 		properties.setProperty(ConfigConstants.NPC_IS_HEADLESS, "true");
+		properties.setProperty(ConfigConstants.NPC_SERVER_IP, "localhost");
+		properties.setProperty(ConfigConstants.NPC_SERVER_PORT, "25565");
 	}
 
 	public static boolean saveProperties() {
@@ -66,7 +68,7 @@ public class ModConfig {
 	public static String getProperty(String key) {
 		if (!properties.containsKey(key)) {
 			LOGGER.error("Property key '{}' not found!", key);
-			return null;
+			throw new IllegalArgumentException("Property key not found!");
 		}
 		return properties.getProperty(key);
 	}
