@@ -1,11 +1,11 @@
-package io.sailex.aiNpcLauncher.client.commands;
+package io.sailex.aiNpcLauncher.commands;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.minecraft.server.command.CommandManager.literal;
 
-import io.sailex.aiNpcLauncher.client.launcher.ClientLauncher;
-import io.sailex.aiNpcLauncher.client.launcher.ClientProcessManager;
+import io.sailex.aiNpcLauncher.launcher.ClientLauncher;
+import io.sailex.aiNpcLauncher.launcher.ClientProcessManager;
 import lombok.AllArgsConstructor;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 
 @AllArgsConstructor
 public class CommandManager {
@@ -14,7 +14,7 @@ public class CommandManager {
 	private final ClientProcessManager clientProcessManager;
 
 	public void register() {
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			new SetConfigCommand().register(dispatcher);
 			dispatcher.register(literal("npc")
 					.requires(source -> source.hasPermissionLevel(2))

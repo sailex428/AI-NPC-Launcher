@@ -1,19 +1,19 @@
-package io.sailex.aiNpcLauncher.client.commands;
+package io.sailex.aiNpcLauncher.commands;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import io.sailex.aiNpcLauncher.client.config.ModConfig;
-import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
-import io.sailex.aiNpcLauncher.client.util.LogUtil;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import io.sailex.aiNpcLauncher.config.ModConfig;
+import io.sailex.aiNpcLauncher.constants.ConfigConstants;
+import io.sailex.aiNpcLauncher.util.LogUtil;
+import net.minecraft.server.command.ServerCommandSource;
 
 public class SetConfigCommand {
 
-	public void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+	public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
 		dispatcher.register(literal("setconfig")
 				.requires(source -> source.hasPermissionLevel(2))
 				.then(argument("key", StringArgumentType.word())
@@ -26,7 +26,7 @@ public class SetConfigCommand {
 						.then(argument("value", StringArgumentType.string()).executes(this::setConfig))));
 	}
 
-	private int setConfig(CommandContext<FabricClientCommandSource> context) {
+	private int setConfig(CommandContext<ServerCommandSource> context) {
 		String propertyKey = StringArgumentType.getString(context, "key");
 		String propertyValue = StringArgumentType.getString(context, "value");
 
