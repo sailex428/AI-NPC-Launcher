@@ -1,8 +1,8 @@
-package io.sailex.aiNpcLauncher.client.config;
+package io.sailex.aiNpcLauncher.config;
 
-import static io.sailex.aiNpcLauncher.client.AiNPCLauncher.MOD_ID;
+import static io.sailex.aiNpcLauncher.AiNPCLauncher.MOD_ID;
 
-import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
+import io.sailex.aiNpcLauncher.constants.ConfigConstants;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -42,7 +42,6 @@ public class ModConfig {
 		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY, "your-api-key");
 		properties.setProperty(ConfigConstants.NPC_LLM_TYPE, "openai");
 		properties.setProperty(ConfigConstants.NPC_IS_HEADLESS, "true");
-		properties.setProperty(ConfigConstants.NPC_SERVER_IP, "localhost");
 		properties.setProperty(ConfigConstants.NPC_SERVER_PORT, "25565");
 	}
 

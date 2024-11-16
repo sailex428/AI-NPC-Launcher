@@ -1,9 +1,10 @@
-package io.sailex.aiNpcLauncher.client.launcher;
+package io.sailex.aiNpcLauncher.launcher;
 
-import io.sailex.aiNpcLauncher.client.config.ModConfig;
-import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
-import io.sailex.aiNpcLauncher.client.constants.ModRepositories;
-import io.sailex.aiNpcLauncher.client.util.LogUtil;
+import io.sailex.aiNpcLauncher.AiNPCLauncher;
+import io.sailex.aiNpcLauncher.config.ModConfig;
+import io.sailex.aiNpcLauncher.constants.ConfigConstants;
+import io.sailex.aiNpcLauncher.constants.ModRepositories;
+import io.sailex.aiNpcLauncher.util.LogUtil;
 import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
@@ -27,10 +28,9 @@ import me.earth.headlessmc.launcher.launch.LaunchOptions;
 import me.earth.headlessmc.launcher.specifics.VersionSpecificException;
 import me.earth.headlessmc.launcher.version.Version;
 import me.earth.headlessmc.launcher.version.VersionImpl;
+import net.fabricmc.loader.api.FabricLoader;
 import net.lenni0451.commons.httpclient.HttpClient;
 import net.minecraft.SharedConstants;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ServerInfo;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
@@ -40,14 +40,12 @@ import org.apache.logging.log4j.Logger;
 public class ClientLauncher {
 
 	private static final Logger LOGGER = LogManager.getLogger(ClientLauncher.class);
-	private final MinecraftClient client;
 	private final ClientProcessManager npcClientProcesses;
 	private final Launcher launcher;
 
 	public ClientLauncher(ClientProcessManager npcClientProcesses) {
 		this.npcClientProcesses = npcClientProcesses;
 		this.launcher = initLauncher();
-		this.client = MinecraftClient.getInstance();
 		setMcDir();
 	}
 
@@ -107,10 +105,9 @@ public class ClientLauncher {
 	}
 
 	private void setMcDir() {
-		String defaultMcDir =
-				launcher.getLauncherConfig().getMcFiles().getBase().getPath();
-		FileManager fileManager =
-				new FileManager(Path.of(defaultMcDir, "ai-npc").toString());
+		String gameDir =
+				FabricLoader.getInstance().getGameDir().toAbsolutePath().toString();
+		FileManager fileManager = new FileManager(Path.of(gameDir, "ai-npcs").toString());
 
 		launcher.getLauncherConfig().setMcFiles(fileManager);
 		launcher.getLauncherConfig().setGameDir(fileManager);
@@ -121,7 +118,7 @@ public class ClientLauncher {
 		if (version != null) {
 			return version;
 		}
-		LogUtil.info("Downloading Fabric client...");
+		LogUtil.info("Downloading Fabric client.");
 		Version neededVersion = VersionImpl.builder().name(versionName).build();
 
 		DownloadCommand downloadCommand = new DownloadCommand(launcher);
@@ -172,16 +169,12 @@ public class ClientLauncher {
 
 	private LaunchAccount getAccount(String npcName, boolean isOffline) {
 		if (isOffline) {
-			LogUtil.info("Logging in offline...");
-			ServerInfo serverInfo = client.getCurrentServerEntry();
-			if (serverInfo != null && serverInfo.address.equals("localhost")) {
-				return new LaunchAccount("msa", npcName, UUID.randomUUID().toString(), "", "");
-			}
-			LogUtil.error("Failed to login. You are not connected to a local server.");
+			LogUtil.info("Logging in offline.");
+			return new LaunchAccount("msa", npcName, UUID.randomUUID().toString(), "", "");
 		}
 
 		try {
-			LogUtil.info("Logging in MC account...");
+			LogUtil.info("Logging in MC account.");
 			HttpClient httpClient = MinecraftAuth.createHttpClient();
 			StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
 					httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
@@ -232,17 +225,12 @@ public class ClientLauncher {
 	}
 
 	private void addServerAddressJvmArg(List<String> jvmArgs) {
-		String address;
-		ServerInfo serverInfo = client.getCurrentServerEntry();
-		if (serverInfo != null) {
-			address = serverInfo.address;
-		} else {
-			address = ModConfig.getProperty(ConfigConstants.NPC_SERVER_IP);
+		String serverPort = String.valueOf(AiNPCLauncher.server.getServerPort());
+		if (serverPort.isEmpty()) {
+			serverPort = ModConfig.getProperty(ConfigConstants.NPC_SERVER_PORT);
 		}
-
-		String port = ModConfig.getProperty(ConfigConstants.NPC_SERVER_PORT);
-		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_SERVER_IP, address));
-		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_SERVER_PORT, port));
+		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_SERVER_IP, "localhost"));
+		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_SERVER_PORT, serverPort));
 	}
 
 	private String buildJvmArg(String key, String value) {

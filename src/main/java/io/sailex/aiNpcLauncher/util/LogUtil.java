@@ -1,6 +1,6 @@
-package io.sailex.aiNpcLauncher.client.util;
+package io.sailex.aiNpcLauncher.util;
 
-import net.minecraft.client.MinecraftClient;
+import io.sailex.aiNpcLauncher.AiNPCLauncher;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +9,6 @@ public class LogUtil {
 
 	private static final Logger LOGGER = LogManager.getLogger(LogUtil.class);
 	private static final String PREFIX = "[§5AI-NPC§f] ";
-	private static final MinecraftClient client = MinecraftClient.getInstance();
 
 	public static void info(String message) {
 		info(message, false);
@@ -30,6 +29,6 @@ public class LogUtil {
 	}
 
 	private static void log(String formattedMessage) {
-		client.inGameHud.getChatHud().addMessage(Text.of(formattedMessage));
+		AiNPCLauncher.server.getPlayerManager().broadcast(Text.of(formattedMessage), false);
 	}
 }
