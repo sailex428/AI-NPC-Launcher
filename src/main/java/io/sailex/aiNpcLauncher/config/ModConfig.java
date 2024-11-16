@@ -35,11 +35,11 @@ public class ModConfig {
 	}
 
 	private static void setDefaultProperties() {
-		properties.setProperty(ConfigConstants.NPC_LLM_OLLAMA_URL, "http://localhost:11434/api/generate");
+		properties.setProperty(ConfigConstants.NPC_LLM_OLLAMA_URL, "http://localhost:11434");
 		properties.setProperty(ConfigConstants.NPC_LLM_OLLAMA_MODEL, "gemma2");
 
 		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_MODEL, "gpt-4o-mini");
-		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY, "your-api-key");
+		properties.setProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY, "");
 		properties.setProperty(ConfigConstants.NPC_LLM_TYPE, "openai");
 		properties.setProperty(ConfigConstants.NPC_IS_HEADLESS, "true");
 		properties.setProperty(ConfigConstants.NPC_SERVER_PORT, "25565");

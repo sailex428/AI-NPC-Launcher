@@ -34,12 +34,9 @@ import net.minecraft.SharedConstants;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class ClientLauncher {
 
-	private static final Logger LOGGER = LogManager.getLogger(ClientLauncher.class);
 	private final ClientProcessManager npcClientProcesses;
 	private final Launcher launcher;
 
@@ -85,7 +82,7 @@ public class ClientLauncher {
 				}
 
 				npcClientProcesses.addProcess(npcName, process);
-				LogUtil.info("Launching AI-NPC client!");
+				LogUtil.info("Launching AI-NPC client.");
 			} catch (Exception e) {
 				LogUtil.error("Failed to setup or launch the game.");
 			}
@@ -163,7 +160,7 @@ public class ClientLauncher {
 							ModRepositories.AI_NPC,
 							Path.of(launcher.getLauncherConfig().getMcFiles().getPath(), "mods"));
 		} catch (VersionSpecificException | IOException e) {
-			LOGGER.error("Failed to download/install AI-NPC mod.");
+			LogUtil.error("Failed to download/install AI-NPC mod.");
 		}
 	}
 
@@ -215,11 +212,14 @@ public class ClientLauncher {
 		}
 
 		if (llmType.equals("openai")) {
+			String apiKey = ModConfig.getProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY);
+			if (apiKey == null || apiKey.isEmpty()) {
+				LogUtil.error("OpenAI API key is missing.");
+				return null;
+			}
 			jvmArgs.addAll(List.of(
 					buildJvmArg(ConfigConstants.NPC_LLM_OPENAI_MODEL, llmModel),
-					buildJvmArg(
-							ConfigConstants.NPC_LLM_OPENAI_API_KEY,
-							ModConfig.getProperty(ConfigConstants.NPC_LLM_OPENAI_API_KEY))));
+					buildJvmArg(ConfigConstants.NPC_LLM_OPENAI_API_KEY, apiKey)));
 		}
 		return jvmArgs;
 	}
