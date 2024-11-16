@@ -69,12 +69,13 @@ Ollama is a local LLM platform for running AI models directly on your machine, r
    - Visit [Ollamas Website](https://ollama.com/) and download the installer for your operating system.  
 
 2. **Install and Run Ollama**:  
-   - Follow the setup instructions to install.  
+   - Follow the setup instructions to install.
+   - Download a model (i recommend the gemma2 model)
    - Start Ollama and ensure it's running in the background.  
 
 3. **Connect to the Mod**:  
    - Use the `/npc add` command with `ollama` as the model type.  
-   - Example: `/npc add npcname true ollama llama-2`
+   - Example: `/npc add sailex true ollama gemma2`
    - if your server runs on a diffrent address you can set that via `/setconfig npc.llm.ollama.url <youre server address>`.
 
 ## Development Status
