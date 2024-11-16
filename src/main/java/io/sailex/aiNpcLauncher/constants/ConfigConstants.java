@@ -1,4 +1,4 @@
-package io.sailex.aiNpcLauncher.client.constants;
+package io.sailex.aiNpcLauncher.constants;
 
 import java.util.Set;
 
@@ -19,7 +19,6 @@ public class ConfigConstants {
 			NPC_LLM_OPENAI_MODEL,
 			NPC_LLM_OPENAI_API_KEY,
 			NPC_LLM_TYPE,
-			NPC_SERVER_IP,
 			NPC_SERVER_PORT,
 			NPC_IS_HEADLESS);
 }

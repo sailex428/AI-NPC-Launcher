@@ -1,4 +1,4 @@
-package io.sailex.aiNpcLauncher.client.constants;
+package io.sailex.aiNpcLauncher.constants;
 
 import me.earth.headlessmc.launcher.specifics.VersionSpecificModRepository;
 import me.earth.headlessmc.launcher.util.URLs;

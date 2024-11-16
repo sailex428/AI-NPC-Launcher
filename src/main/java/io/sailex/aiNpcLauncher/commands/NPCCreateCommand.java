@@ -1,18 +1,18 @@
-package io.sailex.aiNpcLauncher.client.commands;
+package io.sailex.aiNpcLauncher.commands;
 
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.server.command.CommandManager.literal;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import io.sailex.aiNpcLauncher.client.config.ModConfig;
-import io.sailex.aiNpcLauncher.client.constants.ConfigConstants;
-import io.sailex.aiNpcLauncher.client.launcher.ClientLauncher;
-import io.sailex.aiNpcLauncher.client.util.LogUtil;
+import io.sailex.aiNpcLauncher.config.ModConfig;
+import io.sailex.aiNpcLauncher.constants.ConfigConstants;
+import io.sailex.aiNpcLauncher.launcher.ClientLauncher;
+import io.sailex.aiNpcLauncher.util.LogUtil;
 import java.util.Set;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.server.command.ServerCommandSource;
 
 public class NPCCreateCommand {
 
@@ -27,8 +27,9 @@ public class NPCCreateCommand {
 		this.clientLauncher = clientLauncher;
 	}
 
-	public LiteralArgumentBuilder<FabricClientCommandSource> getCommand() {
+	public LiteralArgumentBuilder<ServerCommandSource> getCommand() {
 		return literal("add")
+				.requires(source -> source.hasPermissionLevel(2))
 				.then(argument("name", StringArgumentType.string())
 						.then(argument("isOffline", BoolArgumentType.bool())
 								.executes(this::createNPC)
@@ -43,7 +44,7 @@ public class NPCCreateCommand {
 												.executes(this::createNPCWithLLM)))));
 	}
 
-	private int createNPC(CommandContext<FabricClientCommandSource> context) {
+	private int createNPC(CommandContext<ServerCommandSource> context) {
 		String name = StringArgumentType.getString(context, "name");
 		boolean isOffline = BoolArgumentType.getBool(context, "isOffline");
 
@@ -55,7 +56,7 @@ public class NPCCreateCommand {
 		return 1;
 	}
 
-	private int createNPCWithLLM(CommandContext<FabricClientCommandSource> context) {
+	private int createNPCWithLLM(CommandContext<ServerCommandSource> context) {
 		String name = StringArgumentType.getString(context, "name");
 		boolean isOffline = BoolArgumentType.getBool(context, "isOffline");
 		String llmType = StringArgumentType.getString(context, LLM_TYPE);
