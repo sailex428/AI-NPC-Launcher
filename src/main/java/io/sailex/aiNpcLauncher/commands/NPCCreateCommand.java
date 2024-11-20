@@ -52,7 +52,7 @@ public class NPCCreateCommand {
 
 		String type = ModConfig.getProperty(ConfigConstants.NPC_LLM_TYPE);
 
-		clientLauncher.launch(name, type, getLlmModel(type), isOffline);
+		clientLauncher.launchAsync(name, type, getLlmModel(type), isOffline);
 		return 1;
 	}
 
@@ -64,7 +64,7 @@ public class NPCCreateCommand {
 
 		LogUtil.info(("Creating NPC with name: " + name + ", LLM Type: " + llmType + ", LLM Model: " + llmModel));
 
-		clientLauncher.launch(name, llmType, llmModel, isOffline);
+		clientLauncher.launchAsync(name, llmType, llmModel, isOffline);
 		return 1;
 	}
 

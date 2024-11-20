@@ -38,66 +38,72 @@ import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 public class ClientLauncher {
 
 	private final ClientProcessManager npcClientProcesses;
-	private final Launcher launcher;
+	private Launcher launcher;
+	private FileManager files;
+	private Version version;
 
 	public ClientLauncher(ClientProcessManager npcClientProcesses) {
 		this.npcClientProcesses = npcClientProcesses;
-		this.launcher = initLauncher();
-		setMcDir();
+		CompletableFuture.runAsync(this::initLauncher);
 	}
 
-	public void launch(String npcName, String llmType, String llmModel, boolean isOffline) {
+	public void launchAsync(String npcName, String llmType, String llmModel, boolean isOffline) {
 		LaunchAccount account = getAccount(npcName, isOffline);
 		if (account == null) {
 			LogUtil.error("Failed to login.");
 			return;
 		}
-
-		CompletableFuture.runAsync(() -> {
-			try {
-				String versionName = SharedConstants.getGameVersion().getName();
-				Version version = findOrDownloadFabric(versionName);
-
-				installAiNpcClientMod(version);
-
-				FileManager files = launcher.getFileManager()
-						.createRelative(UUID.randomUUID().toString());
-
-				LaunchOptions options = LaunchOptions.builder()
-						.account(account)
-						.additionalJvmArgs(getJvmArgs(llmType, llmModel))
-						.version(version)
-						.launcher(launcher)
-						.files(files)
-						.parseFlags(launcher, false)
-						.lwjgl(Boolean.parseBoolean(ModConfig.getProperty(ConfigConstants.NPC_IS_HEADLESS)))
-						.prepare(false)
-						.build();
-
-				Process process = launcher.getProcessFactory().run(options);
-
-				if (process == null) {
-					launcher.getExitManager().exit(0);
-					LogUtil.error("Failed to launch the game.");
-				}
-
-				npcClientProcesses.addProcess(npcName, process);
-				LogUtil.info("Launching AI-NPC client.");
-			} catch (Exception e) {
-				LogUtil.error("Failed to setup or launch the game.");
-			}
-		});
+		CompletableFuture.runAsync(() -> launch(account, npcName, llmType, llmModel));
 	}
 
-	private Launcher initLauncher() {
-		LauncherBuilder builder = new LauncherBuilder();
-		builder.exitManager(new ExitManager());
-		builder.initLogging();
-
+	private void launch(LaunchAccount account, String npcName, String llmType, String llmModel) {
 		try {
-			return builder.buildDefault();
+			LaunchOptions options = LaunchOptions.builder()
+					.account(account)
+					.additionalJvmArgs(getJvmArgs(llmType, llmModel))
+					.version(version)
+					.launcher(launcher)
+					.files(files)
+					.parseFlags(launcher, false)
+					.lwjgl(Boolean.parseBoolean(ModConfig.getProperty(ConfigConstants.NPC_IS_HEADLESS)))
+					.prepare(false)
+					.build();
+
+			Process process = launcher.getProcessFactory().run(options);
+
+			if (process == null) {
+				launcher.getExitManager().exit(0);
+				LogUtil.error("Failed to launch the game.");
+			}
+
+			npcClientProcesses.addProcess(npcName, process);
+			LogUtil.info("Launching AI-NPC client.");
+		} catch (Exception e) {
+			LogUtil.error("Failed to setup or launch the game.");
+		}
+	}
+
+	private void initLauncher() {
+		try {
+			LauncherBuilder builder = new LauncherBuilder();
+			builder.exitManager(new ExitManager());
+			launcher = builder.buildDefault();
+
+			String versionName = SharedConstants.getGameVersion().getName();
+			version = findOrDownloadFabric(versionName);
+
+			installAiNpcClientMod(version);
+
+			if (launcher == null) {
+				LogUtil.error("Failed to initialize the FileManager.");
+				return;
+			}
+			this.files = launcher.getFileManager().createRelative(UUID.randomUUID().toString());
+			setMcDir();
 		} catch (AuthException e) {
-			throw new RuntimeException(e);
+			LogUtil.error("Failed to authenticate.");
+		} catch (CommandException e) {
+			LogUtil.error("Failed to download/install the game.");
 		}
 	}
 
@@ -174,27 +180,30 @@ public class ClientLauncher {
 			LogUtil.info("Logging in MC account.");
 			HttpClient httpClient = MinecraftAuth.createHttpClient();
 			StepFullJavaSession.FullJavaSession javaSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.getFromInput(
-					httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(msaDeviceCode -> {
-						LogUtil.info("Go to", true);
-						LogUtil.info(msaDeviceCode.getDirectVerificationUri(), true);
-						try {
-							URI url = URI.create(msaDeviceCode.getDirectVerificationUri());
-							if (Desktop.isDesktopSupported()
-									&& Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-								Desktop.getDesktop().browse(url);
-							} else {
-								new ProcessBuilder("open", url.toString()).start();
-							}
-						} catch (Exception e) {
-							LogUtil.error("Failed to open the verification URL automatically" + e);
-						}
-					}));
+					httpClient, new StepMsaDeviceCode.MsaDeviceCodeCallback(this::handleLogin));
+
 			ValidatedAccount validatedAccount = new ValidatedAccount(
 					javaSession, javaSession.getMcProfile().getMcToken().getAccessToken());
 			return validatedAccount.toLaunchAccount();
 		} catch (Exception e) {
 			LogUtil.error("Login failed: " + e.getMessage());
 			return null;
+		}
+	}
+
+	private void handleLogin(StepMsaDeviceCode.MsaDeviceCode msaDeviceCode) {
+		LogUtil.info("Go to", true);
+		LogUtil.info(msaDeviceCode.getDirectVerificationUri(), true);
+		try {
+			URI url = URI.create(msaDeviceCode.getDirectVerificationUri());
+			if (Desktop.isDesktopSupported()
+					&& Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+				Desktop.getDesktop().browse(url);
+			} else {
+				new ProcessBuilder("open", url.toString()).start();
+			}
+		} catch (Exception e) {
+			LogUtil.error("Failed to open the verification URL automatically" + e);
 		}
 	}
 
