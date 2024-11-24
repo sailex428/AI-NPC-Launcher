@@ -1,6 +1,5 @@
 package io.sailex.aiNpcLauncher.launcher;
 
-import io.sailex.aiNpcLauncher.AiNPCLauncher;
 import io.sailex.aiNpcLauncher.config.ModConfig;
 import io.sailex.aiNpcLauncher.constants.ConfigConstants;
 import io.sailex.aiNpcLauncher.constants.ModRepositories;
@@ -98,8 +97,8 @@ public class ClientLauncher {
 				LogUtil.error("Failed to initialize the FileManager.");
 				return;
 			}
-			this.files = launcher.getFileManager().createRelative(UUID.randomUUID().toString());
 			setMcDir();
+			this.files = launcher.getFileManager().createRelative(UUID.randomUUID().toString());
 		} catch (AuthException e) {
 			LogUtil.error("Failed to authenticate.");
 		} catch (CommandException e) {
@@ -111,6 +110,7 @@ public class ClientLauncher {
 		String gameDir =
 				FabricLoader.getInstance().getGameDir().toAbsolutePath().toString();
 		FileManager fileManager = new FileManager(Path.of(gameDir, "ai-npcs").toString());
+		LogUtil.info("Setting game directory to: " + fileManager.getPath(), true);
 
 		launcher.getLauncherConfig().setMcFiles(fileManager);
 		launcher.getLauncherConfig().setGameDir(fileManager);
@@ -234,10 +234,7 @@ public class ClientLauncher {
 	}
 
 	private void addServerAddressJvmArg(List<String> jvmArgs) {
-		String serverPort = String.valueOf(AiNPCLauncher.server.getServerPort());
-		if (serverPort.isEmpty()) {
-			serverPort = ModConfig.getProperty(ConfigConstants.NPC_SERVER_PORT);
-		}
+		String serverPort = ModConfig.getProperty(ConfigConstants.NPC_SERVER_PORT);
 		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_SERVER_IP, "localhost"));
 		jvmArgs.add(buildJvmArg(ConfigConstants.NPC_SERVER_PORT, serverPort));
 	}
